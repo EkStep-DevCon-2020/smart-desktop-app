@@ -50,5 +50,81 @@
     <script src="script.min.1.1.js"></script>
     <!-- endinjector -->
 </body>
+<script>
+    function executeCommand(command, data) {
+        switch (command) {
+            case 'next':
+                if ($('custom-next-navigation > div > a > img') && $('custom-next-navigation > div > a > img').length > 0) {
+                    $($('custom-next-navigation > div > a > img')[0]).click();
+                } else {
+                    EkstepRendererAPI.next();
+                }
+                break;
+            case 'previous':
+
+                if ($('custom-previous-navigation > div > a > img') && $('custom-next-navigation > div > a > img').length > 0) {
+                    $($('custom-previous-navigation > div > a > img')[0]).click();
+                } else {
+                    EkstepRendererAPI.previous();
+                }
+                break;
+            case 'replay':
+                EkstepRendererAPI.replayContent();
+                EkstepRendererAPI.hideEndPage();
+                EkstepRendererAPI.dispatchEvent('renderer:content:replay');
+                break;
+            case 'select':
+                var option = parseInt(data);
+                $($('.option-block')[option - 1]).trigger("click");
+                break;
+            default:
+                console.log('unknown command')
+        }
+    }
+    setTimeout(() => {
+        window.SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+        var recognition = new window.SpeechRecognition();
+        recognition.onresult = (event) => {
+            console.log('event', event);
+            const speechToText = event.results[event.results.length - 1][0].transcript.trim().toLowerCase();
+            console.log("speechToText : " + speechToText)
+            if (speechToText.indexOf('next') != -1) {
+                executeCommand('next')
+            }
+            if (speechToText.indexOf("replay") != -1 || speechToText.indexOf("reply") != -1) {
+                executeCommand('replay')
+            }
+            if (speechToText.startsWith("prev") || speechToText.indexOf("prev") != -1) {
+                executeCommand('previous')
+            }
+            if (speechToText.indexOf("select") != -1) {
+                if(speechToText.indexOf('1') != -1 || speechToText.indexOf('one') != -1)  {
+                    executeCommand('select', 1);
+                }
+                if(speechToText.indexOf('2') != -1 || speechToText.indexOf('two') != -1) {
+                    executeCommand('select', 2);
+                }
+                if(speechToText.indexOf('3') != -1 || speechToText.indexOf('three') != -1) {
+                    executeCommand('select', 3);
+                }
+                if(speechToText.indexOf('4') != -1 || speechToText.indexOf('for') != -1 || speechToText.indexOf('four') != -1) {
+                    executeCommand('select', 4);
+                }
+                if(speechToText.indexOf('5') != -1 || speechToText.indexOf('five') != -1) {
+                    executeCommand('select', 5);
+                }
+                if(speechToText.indexOf('6') != -1) {
+                    executeCommand('select', 6);
+                }
+            }
+        }
+        recognition.onnomatch = function() {
+            console.log('Speech not recognised');
+        }
+        recognition.continuous = true
+        recognition.interimResults = false;
+        recognition.start()
+    }, 5000)
+</script>
 
 </html>
