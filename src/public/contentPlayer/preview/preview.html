@@ -50,6 +50,7 @@
     <script src="script.min.1.1.js"></script>
     <!-- endinjector -->
 </body>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 <script>
     function executeCommand(command, data) {
         switch (command) {
@@ -123,8 +124,27 @@
         }
         recognition.continuous = true
         recognition.interimResults = false;
-        recognition.start()
+        // recognition.start()
     }, 5000)
+        var peer = new Peer();
+        var conn = peer.connect('smrtdesktopapp');
+        // on open will be launch when you successfully connect to PeerServer
+        conn.on('open', function () {
+            console.log('peer!')
+            // here you have conn.id
+            $(document).click(e => {
+                console.log({
+                x: e.clientX/$(document).width(),
+                y: e.clientY/$(document).height()
+                })
+                conn.send({
+                x: e.clientX/$(document).width(),
+                y: e.clientY/$(document).height()
+            });
+            })
+
+        });
+        
 </script>
 
 </html>
