@@ -48,9 +48,42 @@
 
     <!-- injector:js -->
     <script src="script.min.1.1.js"></script>
+    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.4/mobile-detect.min.js"></script>
     <!-- endinjector -->
 </body>
 <script>
+    
+        
+    var peer = new Peer('smrtdesktopapp');
+    console.log("You are the receiver")
+    peer.on('open', function(id) {
+        console.log('My peer ID is: ' + id);
+    });
+    peer.on('connection', function (conn) {
+        conn.on('data', function (data) {
+            // Will print 'hi!'
+            console.log("Received data:", data, $(document).height(), $(document).width());
+            click(data.x, data.y)
+        });
+    });
+
+    function click(x, y){
+        var screenX = x * $(document).width();
+        var screenY = y * $(document).height();
+        var ev = new MouseEvent('click', {
+            'view': window,
+            'bubbles': true,
+            'cancelable': false,
+            'screenX': screenX,
+            'screenY': screenY
+        });
+        var el = document.elementFromPoint(screenX, screenY);
+        console.log('Element at point - ', el);
+        $(el).click();
+    }
+    
+    var speechRecognitionEnabled = false;
     function executeCommand(command, data) {
         switch (command) {
             case 'next':
@@ -98,32 +131,32 @@
                 executeCommand('previous')
             }
             if (speechToText.indexOf("select") != -1) {
-                if(speechToText.indexOf('1') != -1 || speechToText.indexOf('one') != -1)  {
+                if (speechToText.indexOf('1') != -1 || speechToText.indexOf('one') != -1) {
                     executeCommand('select', 1);
                 }
-                if(speechToText.indexOf('2') != -1 || speechToText.indexOf('two') != -1) {
+                if (speechToText.indexOf('2') != -1 || speechToText.indexOf('two') != -1) {
                     executeCommand('select', 2);
                 }
-                if(speechToText.indexOf('3') != -1 || speechToText.indexOf('three') != -1) {
+                if (speechToText.indexOf('3') != -1 || speechToText.indexOf('three') != -1) {
                     executeCommand('select', 3);
                 }
-                if(speechToText.indexOf('4') != -1 || speechToText.indexOf('for') != -1 || speechToText.indexOf('four') != -1) {
+                if (speechToText.indexOf('4') != -1 || speechToText.indexOf('for') != -1 || speechToText.indexOf('four') != -1) {
                     executeCommand('select', 4);
                 }
-                if(speechToText.indexOf('5') != -1 || speechToText.indexOf('five') != -1) {
+                if (speechToText.indexOf('5') != -1 || speechToText.indexOf('five') != -1) {
                     executeCommand('select', 5);
                 }
-                if(speechToText.indexOf('6') != -1) {
+                if (speechToText.indexOf('6') != -1) {
                     executeCommand('select', 6);
                 }
             }
         }
-        recognition.onnomatch = function() {
+        recognition.onnomatch = function () {
             console.log('Speech not recognised');
         }
         recognition.continuous = true
         recognition.interimResults = false;
-        recognition.start()
+        if(speechRecognitionEnabled) recognition.start()
     }, 5000)
 </script>
 
