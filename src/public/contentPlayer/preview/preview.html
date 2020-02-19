@@ -48,29 +48,65 @@
 
     <!-- injector:js -->
     <script src="script.min.1.1.js"></script>
-    <script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.2.0/peerjs.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mobile-detect@1.4.4/mobile-detect.min.js"></script>
     <!-- endinjector -->
 </body>
+<script src="https://unpkg.com/peerjs@1.0.0/dist/peerjs.min.js"></script>
 <script>
-    
-        
-    var peer = new Peer('smrtdesktopapp');
-    console.log("You are the receiver")
-    peer.on('open', function(id) {
-        console.log('My peer ID is: ' + id);
-    });
-    peer.on('connection', function (conn) {
-        conn.on('data', function (data) {
-            // Will print 'hi!'
-            console.log("Received data:", data, $(document).height(), $(document).width());
-            click(data.x, data.y)
-        });
-    });
 
-    function click(x, y){
+    var md = new MobileDetect(window.navigator.userAgent);
+    
+    if(md.mobile()) {
+        setTimeout(() => {
+            var peer = new Peer();
+            var conn = peer.connect('smrtdesktopapp', {serialization: 'json'});
+            // on open will be launch when you successfully connect to PeerServer
+            conn.on('open', function () {
+                alert("Connected to the desktop app. You can control the desktop now");
+                conn.send({
+                    x: 0,
+                    y: 0
+                });
+                // here you have conn.id
+                $(document).click(e => {
+                    console.log({
+                        x: e.clientX / $(document).width(),
+                        y: e.clientY / $(document).height()
+                    })
+                    conn.send({
+                        x: e.clientX / $(document).width(),
+                        y: e.clientY / $(document).height()
+                    });
+                })
+            });
+            conn.on('error', function(err) { 
+                console.log('conn.error', err);
+                alert('error' + err.type);
+            });
+            peer.on('error', function(err) { 
+                console.log('peer.error', err);
+                alert('error' + err.type);
+            });
+        }, 10000);
+    } else {
+        var peer = new Peer('smrtdesktopapp');
+        console.log("You are the receiver")
+        peer.on('open', function (id) {
+            console.log('My peer ID is: ' + id);
+        });
+        peer.on('connection', function (conn) {
+            conn.on('data', function (data) {
+                // Will print 'hi!'
+                console.log("Received data:", data, $(document).height(), $(document).width());
+                click(data.x, data.y)
+            });
+        });
+    }
+
+    function click(x, y) {
         var screenX = x * $(document).width();
-        var screenY = y * $(document).height();
+        var screenY = (y - 0.03) * $(document).height();
         var ev = new MouseEvent('click', {
             'view': window,
             'bubbles': true,
@@ -78,11 +114,11 @@
             'screenX': screenX,
             'screenY': screenY
         });
-        var el = document.elementFromPoint(screenX, screenY);
-        console.log('Element at point - ', el);
-        $(el).click();
+        var els = document.elementsFromPoint(screenX, screenY);
+        console.log('Element at point - ', els);
+        $(els[0]).click();
     }
-    
+
     var speechRecognitionEnabled = false;
     function executeCommand(command, data) {
         switch (command) {
@@ -156,8 +192,9 @@
         }
         recognition.continuous = true
         recognition.interimResults = false;
-        if(speechRecognitionEnabled) recognition.start()
+        if (speechRecognitionEnabled) recognition.start()
     }, 5000)
+
 </script>
 
 </html>
