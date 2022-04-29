@@ -65,7 +65,7 @@
     "dependencies": {
         "@project-sunbird/ext-framework-server": "0.1.26",
         "OpenRAP": "git://github.com/project-sunbird/OpenRAP.git#release-2.7.0",
-        "async": "^2.6.3",
+        "async": "^2.6.4",
         "body-parser": "^1.19.0",
         "express": "^4.17.0",
         "fs-extra": "^8.1.0",
